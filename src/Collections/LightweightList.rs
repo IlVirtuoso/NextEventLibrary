@@ -77,6 +77,8 @@ where
         
     }
 
+    
+
 
 }
 
@@ -107,6 +109,10 @@ mod tests {
                 value: value,
             }
         }
+
+        pub fn create_ptr(value: T) -> Rc<RefCell<MockValue<T>>>{
+            Rc::new(RefCell::new(MockValue::new(value)))
+        }
     }
 
     #[test]
@@ -119,4 +125,26 @@ mod tests {
             assert_eq!((*v.unwrap()).value, (*value.as_ptr()).value);
         }
     }
+
+    #[test]
+    fn test_pop() {
+        let mut list: LwList<MockValue<i32>> = LwList::new();
+        let mut v1 = MockValue::<i32>::create_ptr(3);
+        let mut v2 = MockValue::<i32>::create_ptr(2);
+        let mut v3 = MockValue::<i32>::create_ptr(1);
+        
+        list.push(v1.as_ptr());
+        list.push(v2.as_ptr());
+        list.push(v3.as_ptr());
+
+        unsafe{
+        assert_eq!((*v1.as_ptr()).value, (*list.front().unwrap()).value);
+        list.pop();
+        assert_eq!((*v2.as_ptr()).value, (*list.front().unwrap()).value);
+        list.pop();
+        assert_eq!((*v3.as_ptr()).value, (*list.front().unwrap()).value);
+
+
+        }
+    } 
 }

@@ -1,3 +1,5 @@
+use core::fmt;
+
 
 #[derive(Clone,Copy)]
 pub enum EventType{
@@ -25,3 +27,17 @@ impl Event{
       }      
 }
 
+impl fmt::Display for EventType{
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+      let mut result : &str = "";
+        match self {
+            EventType::ARRIVAL => result = "Arrival",
+            EventType::DEPARTURE => result="Departure",
+            EventType::END => result="End",
+            EventType::PROBE => result= "Probe",
+            EventType::MAINTENANCE => result="Maintenance",
+            EventType::NOEVENT => result="NoEvent",
+        }
+        f.write_str(result)
+    }
+}

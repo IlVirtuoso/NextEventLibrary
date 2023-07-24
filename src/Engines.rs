@@ -8,6 +8,7 @@ use crate::{
     Stations::Station::{self, IStation},
 };
 
+
 pub struct Engine {
     queue: LinkedList<(String, Event)>,
     stations: Vec<&'static dyn IStation>,

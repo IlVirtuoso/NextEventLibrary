@@ -8,6 +8,8 @@ edition = "2021"
 crate-type = ["lib"]
 name = "NESLib"
 
+
 [dependencies]
 log = "0.4.19"
+NESLib_macro = {path = "macros"}
 

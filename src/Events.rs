@@ -2,6 +2,7 @@ use core::fmt;
 
 use NESLib_macro::LwItem;
 
+use crate::Collections::LightweightList::ILwItem;
 use crate::Collections::LightweightList::LwHeader;
 
 #[derive(Clone, Copy)]

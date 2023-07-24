@@ -1,31 +1,28 @@
 mod support;
-use proc_macro::{TokenStream, Group};
-use quote::quote;
+use proc_macro::TokenStream;
+use quote::{quote, ToTokens, format_ident};
+use support::{get_struct_name, get_attrib_field_name};
 
 #[proc_macro_derive(LwItem,attributes(Header))]
 pub fn lwitem_macro(input : TokenStream) -> TokenStream{
-      let name = "";
-      let field = "";
-      for v in input.into_iter(){
-            match v {
-                proc_macro::TokenTree::Group(grp) => {lwitem_macro(grp.stream());},
-                proc_macro::TokenTree::Ident(id) => println!("id: {}",id),
-                proc_macro::TokenTree::Punct(punc) => println!("punc: {}",punc),
-                proc_macro::TokenTree::Literal(lit) => println!("lit: {}",lit),
-            }
-      }
-      /* 
+      
+      
+      let mut iter = input.into_iter();
+      let name = format_ident!("{}",get_struct_name(iter.clone()).unwrap().to_string());
+
+      //let field = get_attrib_field_name(grpStream.into_iter(), "Header".to_string());
+      let field = format_ident!("{}","_header".to_string());
+      
      let token = quote!(
-            impl LwItem for #name{
-                  pub fn get_header(&self) -> LwHeader{
-                        self.#field
+      
+           impl ILwItem for #name{
+                  fn get_header(&mut self) -> &mut LwHeader{
+                        &mut self.#field
                   }
             }
       );
 
-      return token.into();
-      */
-      TokenStream::new()     
+      return token.into();    
 }
 
 #[proc_macro_attribute]

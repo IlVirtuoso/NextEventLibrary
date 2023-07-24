@@ -7,5 +7,6 @@ edition = "2021"
 proc-macro = true
 
 [dependencies]
+cargo-expand = "1.0.62"
 quote = "1.0.32"
 

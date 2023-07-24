@@ -1,4 +1,4 @@
-use std::{array::IntoIter, fmt::Debug};
+use std::{array::IntoIter, fmt::Debug, ops::Add};
 
 use proc_macro::{Ident, TokenStream, TokenTree};
 
@@ -33,6 +33,8 @@ macro_rules! is_invariant {
           false
       }};
 }
+
+
 
 pub fn get_struct_name(stream: impl Iterator<Item = TokenTree>) -> Option<proc_macro::Ident> {
     let mut iter = stream;

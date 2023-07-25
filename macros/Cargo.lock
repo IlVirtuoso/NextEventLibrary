@@ -3,7 +3,7 @@
 version = 3
 
 [[package]]
-name = "NESLib_macro"
+name = "NESLib-macros"
 version = "0.1.0"
 dependencies = [
  "cargo-expand",

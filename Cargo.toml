@@ -11,5 +11,5 @@ name = "NESLib"
 
 [dependencies]
 log = "0.4.19"
-NESLib_macro = {path = "macros"}
+NESLib-macros = {path = "macros"}
 

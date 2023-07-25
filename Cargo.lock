@@ -6,12 +6,12 @@ version = 3
 name = "NESLib"
 version = "0.1.0"
 dependencies = [
- "NESLib_macro",
+ "NESLib-macros",
  "log",
 ]
 
 [[package]]
-name = "NESLib_macro"
+name = "NESLib-macros"
 version = "0.1.0"
 dependencies = [
  "cargo-expand",

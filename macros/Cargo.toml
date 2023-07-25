@@ -1,5 +1,5 @@
 [package]
-name = "NESLib_macro"
+name = "NESLib-macros"
 version = "0.1.0"
 edition = "2021"
 

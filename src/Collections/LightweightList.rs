@@ -1,18 +1,18 @@
-use std::any::Any;
+ use std::any::Any;
 
 
 pub trait ILwItem: Any {
     fn get_header(&mut self) -> &mut LwHeader;
 }
 
-
+#[derive(Clone)]
 pub struct LwHeader {
     next: Option<*mut dyn Any>,
     prev: Option<*mut dyn Any>,
 }
 
 impl LwHeader {
-    pub fn new() -> Self {
+    pub const fn new() -> Self {
         LwHeader {
             next: None,
             prev: None,
@@ -33,7 +33,7 @@ impl<T> LwList<T>
 where
     T: ILwItem,
 {
-    pub fn new() -> Self {
+    pub const fn new() -> Self {
         LwList {
             head: None,
             tail: None,
@@ -112,8 +112,8 @@ mod tests {
             }
         }
 
-        pub fn create_ptr(value: T) -> Rc<RefCell<MockValue<T>>>{
-            Rc::new(RefCell::new(MockValue::new(value)))
+        pub fn create_ptr(value: T) -> *mut MockValue<T>{
+            Box::into_raw(Box::new(MockValue::new(value)))
         }
     }
 
@@ -135,16 +135,16 @@ mod tests {
         let mut v2 = MockValue::<i32>::create_ptr(2);
         let mut v3 = MockValue::<i32>::create_ptr(1);
         
-        list.push(v1.as_ptr());
-        list.push(v2.as_ptr());
-        list.push(v3.as_ptr());
+        list.push(v1);
+        list.push(v2);
+        list.push(v3);
 
         unsafe{
-        assert_eq!((*v1.as_ptr()).value, (*list.front().unwrap()).value);
+        assert_eq!((*v1).value, (*list.front().unwrap()).value);
         list.pop();
-        assert_eq!((*v2.as_ptr()).value, (*list.front().unwrap()).value);
+        assert_eq!((*v2).value, (*list.front().unwrap()).value);
         list.pop();
-        assert_eq!((*v3.as_ptr()).value, (*list.front().unwrap()).value);
+        assert_eq!((*v3).value, (*list.front().unwrap()).value);
 
 
         }

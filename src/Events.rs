@@ -7,7 +7,7 @@ use NESLib_macros::LwItem;
 use crate::Collections::LightweightList::ILwItem;
 use crate::Collections::LightweightList::LwHeader;
 
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy,PartialEq)]
 pub enum EventType {
     ARRIVAL,
     DEPARTURE,
@@ -17,7 +17,9 @@ pub enum EventType {
     NOEVENT,
 }
 
-#[derive(Clone)]
+
+
+#[derive(Clone,PartialEq)]
 pub struct Event {
     pub kind: EventType,
     pub createTime: f64,
@@ -27,6 +29,7 @@ pub struct Event {
     pub subType: EventType,
     pub destination: String,
 }
+
 
 impl Event {
     pub fn new(
@@ -63,3 +66,6 @@ impl fmt::Display for EventType {
         f.write_str(result)
     }
 }
+
+
+

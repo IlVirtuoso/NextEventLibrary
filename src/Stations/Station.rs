@@ -105,4 +105,8 @@ impl StationEngine {
       result.meanCustomerInSystem = self.header.areaS / self.header.observationPeriod as f64;     /* Mean number of customers in system */
       result
     }
+
+    pub const fn GetHeader(&self) -> &StationHeader{
+        &self.header
+    }
 }

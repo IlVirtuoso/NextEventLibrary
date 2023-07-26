@@ -16,7 +16,7 @@ pub struct Engine {
 }
 
 impl Engine {
-    fn instance() -> &'static mut Self {
+    pub fn instance() -> &'static mut Self {
         static mut INSTANCE: Engine = Engine {
             queue: VecDeque::new(),
             stations: Vec::new(),

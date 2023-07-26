@@ -17,9 +17,8 @@ pub enum EventType {
     NOEVENT,
 }
 
-#[derive(LwItem,Clone)]
+#[derive(Clone)]
 pub struct Event {
-   #[Header] _header: LwHeader,
     pub kind: EventType,
     pub createTime: f64,
     pub occurTime: f64,
@@ -28,8 +27,6 @@ pub struct Event {
     pub subType: EventType,
     pub destination: String,
 }
-
-
 
 impl Event {
     pub fn new(
@@ -41,7 +38,6 @@ impl Event {
         destination: String
     ) -> Self {
         Event {
-            _header: LwHeader::new(),
             kind,
             createTime,
             occurTime,

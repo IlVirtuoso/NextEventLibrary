@@ -14,7 +14,7 @@ pub struct StationHeader {
 }
 
 impl StationHeader {
-    pub fn new(name: String) -> Self {
+    pub const fn new(name: String) -> Self {
         Self {
             name: name,
             arrivals: 0,

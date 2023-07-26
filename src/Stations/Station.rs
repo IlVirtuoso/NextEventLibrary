@@ -35,6 +35,11 @@ pub struct StationStatistic
 
 
 impl StationEngine {
+    pub const fn new(stationName: String)->Self{
+        Self { header: StationHeader::new(stationName) }
+    }
+    pub fn Name(&self)->String{self.header.name.clone()}
+
     fn ProcessArrival(&mut self, event: Event) {
         info!(
             "Processing arrival at {} for event {} at time {}",

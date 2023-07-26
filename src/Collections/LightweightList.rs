@@ -74,10 +74,24 @@ where
                 let mut ptr = self.head.unwrap();
                 self.head = Some((*ptr).get_header().next.unwrap().cast());
                 (*ptr).get_header().next = None;
+                (*self.head.unwrap()).get_header().prev =None;
             }
         }
-        
+        else{
+            if self.tail.is_some(){
+                let mut headptr = self.head.unwrap();
+                let mut tailptr = self.tail.unwrap();
+                unsafe{
+                    (*headptr).get_header().next = None;
+                    (*tailptr).get_header().prev = None;
+                }
+                self.tail = None;
+            }
+        }
     }
+
+    pub const fn size(&self) -> usize{self.count}
+    
 
     
 

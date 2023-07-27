@@ -31,9 +31,6 @@ pub struct StationStatistic
     pub meanCustomerInSystem:f64,
 }
 
-
-
-
 impl StationEngine {
     pub const fn new(stationName: String)->Self{
         Self { header: StationHeader::new(stationName) }
@@ -81,10 +78,7 @@ impl StationEngine {
         match event.kind {
             Events::EventType::ARRIVAL => self.ProcessArrival(event),
             Events::EventType::DEPARTURE => self.ProcessDeparture(event),
-            Events::EventType::END => {},
-            Events::EventType::PROBE => {},
-            Events::EventType::MAINTENANCE => {},
-            Events::EventType::NOEVENT => {},
+            _=>{}
         }
     }
 

@@ -60,6 +60,10 @@ impl DataStore {
             result.push_str(&fmt);
         }
         data_file.write_all(result.as_bytes()).expect("Failed to write data in file");
+        for data in &mut self.dataBuffer{
+            *data = None;
+        }
+        self.alloc = 0;
     }
 
     pub fn add_data(&mut self, data: StationStatistic) {

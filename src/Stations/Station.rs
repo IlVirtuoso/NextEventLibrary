@@ -1,7 +1,7 @@
 use super::StationHeader::StationHeader;
 use crate::Events;
 use log::info;
-use std::collections::{self, VecDeque};
+use std::{collections::{self, VecDeque}, fmt::Display};
 use Events::Event;
 
 pub trait IStation: Sync {
@@ -14,28 +14,35 @@ pub struct StationEngine {
 }
 
 #[derive(Default)]
-pub struct StationStatistic
-{
-    pub avgInterArrival:f64,
-    pub avgServiceTime:f64,
-    pub avgDelay:f64,
-    pub avgWaiting:f64,
-    pub utilization:f64,
-    pub throughput:f64,
-    pub inputRate:f64,
-    pub arrivalRate:f64,
-    pub serviceRate:f64,
-    pub traffic:f64,
-    pub meanCustomInQueue:f64,
-    pub meanCustomerInService:f64,
-    pub meanCustomerInSystem:f64,
+pub struct StationStatistic {
+    pub name: String,
+    pub avgInterArrival: f64,
+    pub avgServiceTime: f64,
+    pub avgDelay: f64,
+    pub avgWaiting: f64,
+    pub utilization: f64,
+    pub throughput: f64,
+    pub inputRate: f64,
+    pub arrivalRate: f64,
+    pub serviceRate: f64,
+    pub traffic: f64,
+    pub meanCustomInQueue: f64,
+    pub meanCustomerInService: f64,
+    pub meanCustomerInSystem: f64,
 }
 
+
+
+
 impl StationEngine {
-    pub const fn new(stationName: String)->Self{
-        Self { header: StationHeader::new(stationName) }
+    pub const fn new(stationName: String) -> Self {
+        Self {
+            header: StationHeader::new(stationName),
+        }
     }
-    pub fn Name(&self)->String{self.header.name.clone()}
+    pub fn Name(&self) -> String {
+        self.header.name.clone()
+    }
 
     fn ProcessArrival(&mut self, event: Event) {
         info!(
@@ -43,11 +50,7 @@ impl StationEngine {
             self.header.name, event.kind, event.occurTime
         );
         self.header.sysClients += 1;
-        self.header.maxClients += if self.header.sysClients > self.header.maxClients {
-            1
-        } else {
-            0
-        };
+        self.header.maxClients += if self.header.sysClients > self.header.maxClients {1} else {0};
         self.header.arrivals += 1;
         self.header.lastArrival = event.arrivalTime;
     }
@@ -78,29 +81,32 @@ impl StationEngine {
         match event.kind {
             Events::EventType::ARRIVAL => self.ProcessArrival(event),
             Events::EventType::DEPARTURE => self.ProcessDeparture(event),
-            _=>{}
+            _ => {}
         }
     }
 
-    pub fn GetStatistics(self) -> StationStatistic{
-      let mut  result : StationStatistic = StationStatistic{..Default::default()};
-      result.avgInterArrival = self.header.oldclock / self.header.arrivals as f64 as f64;                /* Average inter-arrival time */
-      result.avgServiceTime = self.header.busyTime / self.header.completions as f64;              /* Average service time */
-      result.avgDelay = self.header.areaS / self.header.completions as f64;                       /* Average delay time */
-      result.avgWaiting = self.header.areaN / self.header.completions as f64;                     /* Average wait time */
-      result.utilization = self.header.busyTime / self.header.observationPeriod as f64;           /* Utilization */
-      result.throughput = self.header.completions as f64 / self.header.observationPeriod;         /* Throughput */
-      result.inputRate = self.header.arrivals as f64 / self.header.oldclock as f64;                      /* Input rate */
-      result.arrivalRate = self.header.arrivals as f64 / self.header.observationPeriod as f64;           /* Arriva rate */
-      result.serviceRate = self.header.completions as f64 / self.header.busyTime as f64;                 /* Service rate */
-      result.traffic = self.header.busyTime / self.header.lastArrival as f64;                     /* Traffic intensity */
-      result.meanCustomInQueue = self.header.areaS / self.header.observationPeriod as f64;        /* Mean number of customers in queue */
-      result.meanCustomerInService = self.header.busyTime / self.header.observationPeriod as f64; /* Mean number of customers in service */
-      result.meanCustomerInSystem = self.header.areaS / self.header.observationPeriod as f64;     /* Mean number of customers in system */
-      result
+    pub fn GetStatistics(self) -> StationStatistic {
+        let mut result: StationStatistic = StationStatistic {
+            ..Default::default()
+        };
+        result.name = self.Name();
+        result.avgInterArrival = self.header.oldclock / self.header.arrivals as f64; /* Average inter-arrival time */
+        result.avgServiceTime = self.header.busyTime / self.header.completions as f64; /* Average service time */
+        result.avgDelay = self.header.areaS / self.header.completions as f64; /* Average delay time */
+        result.avgWaiting = self.header.areaN / self.header.completions as f64; /* Average wait time */
+        result.utilization = self.header.busyTime / self.header.observationPeriod as f64; /* Utilization */
+        result.throughput = self.header.completions as f64 / self.header.observationPeriod; /* Throughput */
+        result.inputRate = self.header.arrivals as f64 / self.header.oldclock as f64; /* Input rate */
+        result.arrivalRate = self.header.arrivals as f64 / self.header.observationPeriod as f64; /* Arriva rate */
+        result.serviceRate = self.header.completions as f64 / self.header.busyTime as f64; /* Service rate */
+        result.traffic = self.header.busyTime / self.header.lastArrival as f64; /* Traffic intensity */
+        result.meanCustomInQueue = self.header.areaS / self.header.observationPeriod as f64; /* Mean number of customers in queue */
+        result.meanCustomerInService = self.header.busyTime / self.header.observationPeriod as f64; /* Mean number of customers in service */
+        result.meanCustomerInSystem = self.header.areaS / self.header.observationPeriod as f64; /* Mean number of customers in system */
+        result
     }
 
-    pub const fn GetHeader(&self) -> &StationHeader{
+    pub const fn GetHeader(&self) -> &StationHeader {
         &self.header
     }
 }

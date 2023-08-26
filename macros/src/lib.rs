@@ -10,8 +10,10 @@ pub fn lwitem_macro(input : TokenStream) -> TokenStream{
       lwitem_impl(input)
 }
 
-#[proc_macro_attribute]
-pub fn lwitem_attr(input : TokenStream, field: TokenStream) -> TokenStream{
+
+
+#[proc_macro_derive(Format)]
+pub fn format_macro(input : TokenStream)-> TokenStream{
       todo!()
 }
 

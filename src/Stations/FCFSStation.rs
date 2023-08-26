@@ -78,3 +78,13 @@ impl IStation for FCFSStation {
         self.engine.Name()
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_station_arrival() {
+        
+    }
+}

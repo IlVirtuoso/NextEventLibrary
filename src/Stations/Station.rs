@@ -33,6 +33,15 @@ pub struct StationStatistic {
 
 
 
+impl StationStatistic{
+    pub fn to_format(&self, separator: char)-> String{
+        todo!()
+    }
+
+    pub fn get_header(separator: char)-> String{
+        todo!()
+    }
+}
 
 impl StationEngine {
     pub const fn new(stationName: String) -> Self {

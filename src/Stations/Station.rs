@@ -13,7 +13,7 @@ pub struct StationEngine {
     header: StationHeader,
 }
 
-#[derive(Default)]
+#[derive(Default,Clone)]
 pub struct StationStatistic {
     pub name: String,
     pub avgInterArrival: f64,

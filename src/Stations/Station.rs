@@ -1,7 +1,9 @@
 use super::StationHeader::StationHeader;
 use crate::Events;
 use log::info;
-use std::{collections::{self, VecDeque}, fmt::Display};
+use serde::{Deserialize, Serialize};
+
+use std::{collections::{self, VecDeque}, fmt::{Display, format}};
 use Events::Event;
 
 pub trait IStation: Sync {
@@ -13,7 +15,8 @@ pub struct StationEngine {
     header: StationHeader,
 }
 
-#[derive(Default,Clone)]
+#[derive(Default,Clone,Serialize,Deserialize)]
+#[serde(rename_all = "PascalCase")]
 pub struct StationStatistic {
     pub name: String,
     pub avgInterArrival: f64,
@@ -32,16 +35,6 @@ pub struct StationStatistic {
 }
 
 
-
-impl StationStatistic{
-    pub fn to_format(&self, separator: char)-> String{
-        todo!()
-    }
-
-    pub fn get_header(separator: char)-> String{
-        todo!()
-    }
-}
 
 impl StationEngine {
     pub const fn new(stationName: String) -> Self {

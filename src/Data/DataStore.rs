@@ -54,15 +54,15 @@ impl DataStore {
         };
 
         let mut result = String::new();
-        result.push_str(&StationStatistic::get_header(';'));
-        for data in self.dataBuffer.as_ref(){
-            let fmt = data.as_ref().unwrap().to_format(';');
-            result.push_str(&fmt);
-        }
-        data_file.write_all(result.as_bytes()).expect("Failed to write data in file");
+        let mut writer  = csv::Writer::from_writer(data_file);
+
         for data in &mut self.dataBuffer{
+            let value = data.as_ref().unwrap();
+            writer.serialize(value).expect("Failed to write record");
             *data = None;
         }
+        writer.flush().expect("failed to flush");
+        
         self.alloc = 0;
     }
 
@@ -72,5 +72,16 @@ impl DataStore {
         }
         self.dataBuffer[self.alloc] = Some(data);
         self.alloc += 1;
+    }
+}
+
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_store() {
+        
     }
 }

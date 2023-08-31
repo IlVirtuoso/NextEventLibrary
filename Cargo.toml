@@ -17,4 +17,5 @@ log = "0.4.19"
 NESLib-macros = {path = "macros"}
 serde = {version="1.0.188",features = ["derive"]}
 csv = "1.2.2"
+plotters = "0.3.5"
 

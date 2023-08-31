@@ -14,7 +14,7 @@ const MULTIPLIER: i32 = 48271; /* DON'T CHANGE THIS VALUE                  */
 const CHECK: i32 = 399268537; /* DON'T CHANGE THIS VALUE                  */
 const STREAMS: i32 = 256; /* # of streams, DON'T CHANGE THIS VALUE    */
 const A256: i32 = 22925; /* jump multiplier, DON'T CHANGE THIS VALUE */
-const DEFAULT: i32 = 123456789; /* initial seed, use 0 < DEFAULT < MODULUS  */
+const DEFAULT: i32 = 123456; /* initial seed, use 0 < DEFAULT < MODULUS  */
 
 
 pub struct RandomGenerator{
@@ -25,7 +25,7 @@ pub struct RandomGenerator{
 
 impl RandomGenerator{
     pub const fn new()-> Self{
-        RandomGenerator { seed: [0;DEFAULT as usize], stream: 0, initialized: 0 }
+        RandomGenerator { seed: [DEFAULT;DEFAULT as usize], stream: 0, initialized: 0 }
     }
 
     pub fn Random(&mut self) -> f64 {

@@ -34,7 +34,13 @@
  * --------------------------------------------------------------------------
  */
 
-use super::rngs::Random;
+
+
+use super::rngs::{self};
+
+fn Random()-> f64{
+    0.0
+}
 
 /** ========================================================
  * Returns 1 with probability p or 0 with probability 1 - p.
@@ -75,6 +81,7 @@ pub fn Pascal(n: u32, p: f64) -> u32 {
     x
 }
 
+//also called negative exponential
 pub fn Exponential(m: f64) -> f64 {
     -m * (1.0 - Random()).log(10.0)
 }

@@ -7,25 +7,33 @@
  * in Rust made by Matteo Ielacqua
  */
 
-use std::time;
-
+use once_cell::unsync::Lazy;
+use std::{alloc::Layout, time};
 const MODULUS: i32 = 2147483647;
 const MULTIPLIER: i32 = 48271; /* DON'T CHANGE THIS VALUE                  */
 const CHECK: i32 = 399268537; /* DON'T CHANGE THIS VALUE                  */
 const STREAMS: i32 = 256; /* # of streams, DON'T CHANGE THIS VALUE    */
 const A256: i32 = 22925; /* jump multiplier, DON'T CHANGE THIS VALUE */
-const DEFAULT: i32 = 123456; /* initial seed, use 0 < DEFAULT < MODULUS  */
+const DEFAULT: i32 = 123456789; /* initial seed, use 0 < DEFAULT < MODULUS  */
 
-
-pub struct RandomGenerator{
-    seed: [i32;DEFAULT as usize],
+pub struct RandomGenerator {
+    seed: Box<[i32]>,
     stream: usize,
-    initialized: i32 
+    initialized: i32,
 }
 
-impl RandomGenerator{
-    pub const fn new()-> Self{
-        RandomGenerator { seed: [DEFAULT;DEFAULT as usize], stream: 0, initialized: 0 }
+impl RandomGenerator {
+    pub fn new() -> Self {
+        RandomGenerator {
+            seed: vec![DEFAULT;DEFAULT as usize].into_boxed_slice(),
+            stream: 0,
+            initialized: 0,
+        }
+    }
+
+    pub fn Global() -> &'static mut Self {
+        static mut instance: Lazy<RandomGenerator> = Lazy::new(|| RandomGenerator::new());
+        unsafe { &mut instance }
     }
 
     pub fn Random(&mut self) -> f64 {
@@ -33,7 +41,8 @@ impl RandomGenerator{
         const R: i32 = MODULUS % MULTIPLIER;
         unsafe {
             //this is not safe in multithread
-            let mut t: i32 = MULTIPLIER * (self.seed[self.stream] % Q) - R * (self.seed[self.stream] / Q);
+            let mut t: i32 =
+                MULTIPLIER * (self.seed[self.stream] % Q) - R * (self.seed[self.stream] / Q);
             if t > 0 {
                 self.seed[self.stream] = t;
             } else {
@@ -42,8 +51,8 @@ impl RandomGenerator{
             return (self.seed[self.stream] / MODULUS) as f64;
         }
     }
-    
-    pub fn PlantSeeds(&mut self,n: i32) {
+
+    pub fn PlantSeeds(&mut self, n: i32) {
         const Q: i32 = MODULUS / MULTIPLIER;
         const R: i32 = MODULUS % MULTIPLIER;
         let mut x = n;
@@ -59,8 +68,8 @@ impl RandomGenerator{
             }
         }
     }
-    
-    pub fn PutSeed(&mut self,n: i32) {
+
+    pub fn PutSeed(&mut self, n: i32) {
         let mut ok: bool = false;
         let mut x: i32 = {
             if n > 0 {
@@ -72,29 +81,26 @@ impl RandomGenerator{
                     .as_millis() as i32
             }
         };
-    
+
         unsafe {
             self.seed[self.stream] = x;
         }
     }
-    
+
     pub fn GetSeed(&self) -> i32 {
         unsafe { self.seed[self.stream] }
     }
-    
-    pub fn SelectStream(&mut self,index: usize) {
+
+    pub fn SelectStream(&mut self, index: usize) {
         unsafe {
             self.stream = index % STREAMS as usize;
-    
+
             if self.initialized == 0 && self.stream != 0 {
                 self.PlantSeeds(DEFAULT);
             }
         }
     }
-    
 }
-
-
 
 #[cfg(test)]
 mod tests {

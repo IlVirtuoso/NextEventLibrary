@@ -36,10 +36,10 @@
 
 
 
-use super::rngs::{self};
+use super::rngs::{self, RandomGenerator};
 
 fn Random()-> f64{
-    0.0
+    RandomGenerator::Global().Random()
 }
 
 /** ========================================================

@@ -17,4 +17,5 @@ NESLib-macros = {path = "macros"}
 serde = {version="1.0.188",features = ["derive"]}
 csv = "1.2.2"
 plotters = "0.3.5"
+once_cell = "1.18.0"
 

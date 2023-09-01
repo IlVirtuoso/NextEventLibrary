@@ -9,6 +9,7 @@ dependencies = [
  "NESLib-macros",
  "csv",
  "log",
+ "once_cell",
  "plotters",
  "serde",
 ]

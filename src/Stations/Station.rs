@@ -1,10 +1,12 @@
 use super::StationHeader::StationHeader;
-use crate::Events;
+
+use crate::{Events, Data::{DataStore::DataStore, Statistics::StationStatistic}};
 use log::info;
 use serde::{Deserialize, Serialize};
 
 use std::{collections::{self, VecDeque}, fmt::{Display, format}};
 use Events::Event;
+
 
 pub trait IStation: Sync {
     fn Process(&mut self, event: Event);
@@ -15,24 +17,7 @@ pub struct StationEngine {
     header: StationHeader,
 }
 
-#[derive(Default,Clone,Serialize,Deserialize)]
-#[serde(rename_all = "PascalCase")]
-pub struct StationStatistic {
-    pub name: String,
-    pub avgInterArrival: f64,
-    pub avgServiceTime: f64,
-    pub avgDelay: f64,
-    pub avgWaiting: f64,
-    pub utilization: f64,
-    pub throughput: f64,
-    pub inputRate: f64,
-    pub arrivalRate: f64,
-    pub serviceRate: f64,
-    pub traffic: f64,
-    pub meanCustomInQueue: f64,
-    pub meanCustomerInService: f64,
-    pub meanCustomerInSystem: f64,
-}
+
 
 
 
@@ -83,15 +68,17 @@ impl StationEngine {
         match event.kind {
             Events::EventType::ARRIVAL => self.ProcessArrival(event),
             Events::EventType::DEPARTURE => self.ProcessDeparture(event),
+            Events::EventType::PROBE=> DataStore().add_data(self.GetStatistics()),
             _ => {}
         }
     }
 
-    pub fn GetStatistics(self) -> StationStatistic {
+    pub fn GetStatistics(&self) -> StationStatistic {
         let mut result: StationStatistic = StationStatistic {
             ..Default::default()
         };
         result.name = self.Name();
+        result.actualClock = self.header.clock;
         result.avgInterArrival = self.header.oldclock / self.header.arrivals as f64; /* Average inter-arrival time */
         result.avgServiceTime = self.header.busyTime / self.header.completions as f64; /* Average service time */
         result.avgDelay = self.header.areaS / self.header.completions as f64; /* Average delay time */

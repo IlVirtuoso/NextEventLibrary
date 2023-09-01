@@ -1,14 +1,16 @@
-use crate::{
-    Data,
-    Stations::Station::{self, StationStatistic},
-};
+use once_cell::sync::Lazy;
+
+
 use std::{
     fs::File,
     path::{Path, PathBuf}, error::Error, io::Write,
 };
 
+use super::Statistics::StationStatistic;
+
 pub(crate) static mut DATA_FILE_NAME: &'static str = "data.csv";
-pub(crate) static mut DATA_STORE: DataStore = DataStore::new();
+
+
 
 const fn parse_u32(s: &str) -> u32 {
     let mut out: u32 = 0;
@@ -29,17 +31,21 @@ const fn buffer_size() -> usize {
 }
 
 pub struct DataStore {
-    dataBuffer: [Option<StationStatistic>; buffer_size()],
+    dataBuffer: Vec<StationStatistic>,
     alloc: usize,
 }
 
 impl DataStore {
-    const fn new() -> Self {
-        const DEFAULT_VALUE: Option<StationStatistic> = None;
+    fn new() -> Self {
         DataStore {
-            dataBuffer: [DEFAULT_VALUE; buffer_size()],
+            dataBuffer: vec![StationStatistic::default();buffer_size()],
             alloc: 0,
         }
+    }
+
+    pub(crate) fn instance()-> &'static mut DataStore{
+        static mut INSTANCE : Lazy<DataStore> = Lazy::new(|| DataStore::new());
+        unsafe{&mut INSTANCE}
     }
 
     pub fn flush_to_file(&mut self) {
@@ -57,9 +63,7 @@ impl DataStore {
         let mut writer  = csv::Writer::from_writer(data_file);
 
         for data in &mut self.dataBuffer{
-            let value = data.as_ref().unwrap();
-            writer.serialize(value).expect("Failed to write record");
-            *data = None;
+            writer.serialize(data).expect("Failed to write record");
         }
         writer.flush().expect("failed to flush");
         
@@ -70,7 +74,7 @@ impl DataStore {
         if self.alloc >= self.dataBuffer.len() {
             self.flush_to_file();
         }
-        self.dataBuffer[self.alloc] = Some(data);
+        self.dataBuffer[self.alloc] = data;
         self.alloc += 1;
     }
 }
@@ -78,6 +82,8 @@ impl DataStore {
 
 #[cfg(test)]
 mod tests {
+    use crate::Data;
+
     use super::*;
 
     #[test]

@@ -10,3 +10,4 @@ pub struct MVAResult{
 pub fn GeneralMVA(visitRates: Vec<f64>, serviceTimes: Vec<f64>) -> MVAResult{
      todo!()
 }
+

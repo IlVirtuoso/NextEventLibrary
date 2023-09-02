@@ -68,7 +68,7 @@ impl StationEngine {
         match event.kind {
             Events::EventType::ARRIVAL => self.ProcessArrival(event),
             Events::EventType::DEPARTURE => self.ProcessDeparture(event),
-            Events::EventType::PROBE=> DataStore().add_data(self.GetStatistics()),
+            Events::EventType::PROBE=> DataStore::instance().add_data(self.GetStatistics()),
             _ => {}
         }
     }

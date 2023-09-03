@@ -34,8 +34,6 @@ impl StationStatistic{
         result.inputRate = Exponential(4.0);
         result.inputRate = Exponential(3.0);
         result.meanCustomInQueue = Poisson(3.0) as f64;
-
         result
-
     }
 }

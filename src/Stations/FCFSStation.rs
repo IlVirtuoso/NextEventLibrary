@@ -29,7 +29,7 @@ impl FCFSStation {
         if self.eventUnderProcess.is_none() {
             let mut newevt = evt.clone();
             let clock = self.engine.GetHeader().clock;
-            self.engine.Process(evt);
+            self.engine.Process(&evt);
             newevt.arrivalTime = clock;
             newevt.occurTime = clock + newevt.serviceTime;
             newevt.createTime = clock;
@@ -67,10 +67,12 @@ impl FCFSStation {
 impl IStation for FCFSStation {
     fn Process(&mut self, event: Event) {
         match event.kind {
-            EventType::ARRIVAL => todo!(),
-            EventType::DEPARTURE => todo!(),
-            EventType::PROBE => todo!(),
-            _=>{}
+            EventType::ARRIVAL => self.ProcessArrival(event),
+            EventType::DEPARTURE => self.ProcessDeparture(event),
+            EventType::END => (),
+            EventType::PROBE => self.engine.Process(&event),
+            EventType::MAINTENANCE => (),
+            EventType::NOEVENT => (),
         }
     }
 
@@ -79,12 +81,15 @@ impl IStation for FCFSStation {
     }
 }
 
+
+
 #[cfg(test)]
 mod tests {
+    use std::alloc::{alloc, Layout,dealloc};
     use super::*;
 
     #[test]
     fn test_station_arrival() {
-        
+
     }
 }

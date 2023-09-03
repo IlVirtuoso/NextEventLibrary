@@ -1,12 +1,17 @@
 use super::StationHeader::StationHeader;
 
-use crate::{Events, Data::{DataStore::DataStore, Statistics::StationStatistic}};
+use crate::{
+    Data::{DataStore::DataStore, Statistics::StationStatistic},
+    Events,
+};
 use log::info;
 use serde::{Deserialize, Serialize};
 
-use std::{collections::{self, VecDeque}, fmt::{Display, format}};
+use std::{
+    collections::{self, VecDeque},
+    fmt::{format, Display},
+};
 use Events::Event;
-
 
 pub trait IStation: Sync {
     fn Process(&mut self, event: Event);
@@ -16,10 +21,6 @@ pub trait IStation: Sync {
 pub struct StationEngine {
     header: StationHeader,
 }
-
-
-
-
 
 impl StationEngine {
     pub const fn new(stationName: String) -> Self {
@@ -31,18 +32,22 @@ impl StationEngine {
         self.header.name.clone()
     }
 
-    fn ProcessArrival(&mut self, event: Event) {
+    fn ProcessArrival(&mut self, event: &Event) {
         info!(
             "Processing arrival at {} for event {} at time {}",
             self.header.name, event.kind, event.occurTime
         );
         self.header.sysClients += 1;
-        self.header.maxClients += if self.header.sysClients > self.header.maxClients {1} else {0};
+        self.header.maxClients += if self.header.sysClients > self.header.maxClients {
+            1
+        } else {
+            0
+        };
         self.header.arrivals += 1;
         self.header.lastArrival = event.arrivalTime;
     }
 
-    fn ProcessDeparture(&mut self, event: Event) {
+    fn ProcessDeparture(&mut self, event: &Event) {
         info!(
             "Processing departure at {} for event {} ar time {}",
             self.header.name, event.kind, event.occurTime
@@ -51,7 +56,7 @@ impl StationEngine {
         self.header.completions += 1;
     }
 
-    pub fn Process(&mut self, event: Event) {
+    pub fn Process(&mut self, event: &Event) {
         self.header.clock = event.occurTime;
         info!(
             "Station:{}, with occur time: {}",
@@ -68,7 +73,7 @@ impl StationEngine {
         match event.kind {
             Events::EventType::ARRIVAL => self.ProcessArrival(event),
             Events::EventType::DEPARTURE => self.ProcessDeparture(event),
-            Events::EventType::PROBE=> DataStore::instance().add_data(self.GetStatistics()),
+            Events::EventType::PROBE => DataStore::instance().add_data(self.GetStatistics()),
             _ => {}
         }
     }
@@ -97,5 +102,27 @@ impl StationEngine {
 
     pub const fn GetHeader(&self) -> &StationHeader {
         &self.header
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_engine_arrival() {
+        let mut engine = StationEngine::new("Test".to_string());
+        engine.Process(&Event::gen_arrival(3.0));
+        assert_eq!(engine.header.arrivals,1);
+    }
+
+    #[test]
+    fn test_engine_departure(){
+        let mut engine = StationEngine::new("Test".to_string());
+        engine.Process(&Event::gen_arrival(3.0));
+        engine.Process(&Event::gen_departure(4.0));
+        assert_eq!(engine.header.arrivals,1);        
+        assert_eq!(engine.header.completions,1);        
+        assert_eq!(engine.header.clock,4.0);        
     }
 }

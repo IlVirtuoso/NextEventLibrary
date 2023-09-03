@@ -50,7 +50,7 @@ impl DataStore {
 
     pub fn flush_to_file(&mut self) {
         let mut data_file = {
-            unsafe {
+           unsafe {
                 if Path::new(DATA_FILE_NAME).exists() {
                     File::open(DATA_FILE_NAME).expect("Error in opening file")
                 } else {

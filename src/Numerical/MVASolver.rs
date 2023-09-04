@@ -1,13 +1,18 @@
+use super::Matrix::Matrix;
+
 
 
 pub struct MVAResult{
-    throughputs: Vec<f64>,
-    utilization:Vec<f64>,
-    meanClients: Vec<i32>,
-    meanWaitTime: Vec<f64>
+    throughputs: Matrix<f64>,
+    utilization:Matrix<f64>,
+    meanClients: Matrix<f64>,
+    meanWaitTime: Matrix<f64>
 }
 
-pub fn GeneralMVA(visitRates: Vec<f64>, serviceTimes: Vec<f64>) -> MVAResult{
-     todo!()
+
+
+
+pub fn GeneralMVA(visitRates: Vec<f64>, serviceTimes: Vec<f64>, N: i32) -> MVAResult{
+    todo!()
 }
 

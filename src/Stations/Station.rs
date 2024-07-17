@@ -1,128 +1,49 @@
-use super::StationHeader::StationHeader;
 
-use crate::{
-    Data::{DataStore::DataStore, Statistics::StationStatistic},
-    Events,
-};
-use log::info;
-use serde::{Deserialize, Serialize};
 
-use std::{
-    collections::{self, VecDeque},
-    fmt::{format, Display},
-};
-use Events::Event;
+use std::{any::Any, borrow::Borrow};
 
-pub trait IStation: Sync {
-    fn Process(&mut self, event: Event);
-    fn Name(&self) -> String;
+use crate::Events::Event;
+
+use super::{Processor::{CoreStationProcessor, IStationProcessor}, StationData::StationData};
+
+type Processor = Box<dyn IStationProcessor>;
+
+pub struct Station{
+    name: String,
+    processors: Vec<Processor>,
+    arrivalProcessor: Option<Processor>,
+    departureProcessor: Option<Processor>
 }
 
-pub struct StationEngine {
-    header: StationHeader,
-}
 
-impl StationEngine {
-    pub const fn new(stationName: String) -> Self {
-        Self {
-            header: StationHeader::new(stationName),
-        }
-    }
-    pub fn Name(&self) -> String {
-        self.header.name.clone()
-    }
 
-    fn ProcessArrival(&mut self, event: &Event) {
-        info!(
-            "Processing arrival at {} for event {} at time {}",
-            self.header.name, event.kind, event.occurTime
-        );
-        self.header.sysClients += 1;
-        self.header.maxClients += if self.header.sysClients > self.header.maxClients {
-            1
-        } else {
-            0
-        };
-        self.header.arrivals += 1;
-        self.header.lastArrival = event.arrivalTime;
-    }
-
-    fn ProcessDeparture(&mut self, event: &Event) {
-        info!(
-            "Processing departure at {} for event {} ar time {}",
-            self.header.name, event.kind, event.occurTime
-        );
-        self.header.sysClients -= 1;
-        self.header.completions += 1;
-    }
-
-    pub fn Process(&mut self, event: &Event) {
-        self.header.clock = event.occurTime;
-        info!(
-            "Station:{}, with occur time: {}",
-            self.header.name, event.occurTime
-        );
-        let interval = self.header.clock - self.header.oldclock;
-        self.header.oldclock = event.occurTime;
-        if self.header.sysClients > 0 {
-            self.header.busyTime += interval;
-            self.header.areaN += self.header.sysClients as f64 * interval;
-            self.header.areaS += (self.header.sysClients - 1) as f64 * interval;
-        }
-
-        match event.kind {
-            Events::EventType::ARRIVAL => self.ProcessArrival(event),
-            Events::EventType::DEPARTURE => self.ProcessDeparture(event),
-            Events::EventType::PROBE => DataStore::instance().add_data(self.GetStatistics()),
-            _ => {}
+impl Station {
+    fn new(name: &str) -> Self {
+        Station {
+            name: name.to_string(),
+            processors: vec![],
+            arrivalProcessor: None,
+            departureProcessor: None
         }
     }
 
-    pub fn GetStatistics(&self) -> StationStatistic {
-        let mut result: StationStatistic = StationStatistic {
-            ..Default::default()
-        };
-        result.name = self.Name();
-        result.actualClock = self.header.clock;
-        result.avgInterArrival = self.header.oldclock / self.header.arrivals as f64; /* Average inter-arrival time */
-        result.avgServiceTime = self.header.busyTime / self.header.completions as f64; /* Average service time */
-        result.avgDelay = self.header.areaS / self.header.completions as f64; /* Average delay time */
-        result.avgWaiting = self.header.areaN / self.header.completions as f64; /* Average wait time */
-        result.utilization = self.header.busyTime / self.header.observationPeriod as f64; /* Utilization */
-        result.throughput = self.header.completions as f64 / self.header.observationPeriod; /* Throughput */
-        result.inputRate = self.header.arrivals as f64 / self.header.oldclock as f64; /* Input rate */
-        result.arrivalRate = self.header.arrivals as f64 / self.header.observationPeriod as f64; /* Arriva rate */
-        result.serviceRate = self.header.completions as f64 / self.header.busyTime as f64; /* Service rate */
-        result.traffic = self.header.busyTime / self.header.lastArrival as f64; /* Traffic intensity */
-        result.meanCustomInQueue = self.header.areaS / self.header.observationPeriod as f64; /* Mean number of customers in queue */
-        result.meanCustomerInService = self.header.busyTime / self.header.observationPeriod as f64; /* Mean number of customers in service */
-        result.meanCustomerInSystem = self.header.areaS / self.header.observationPeriod as f64; /* Mean number of customers in system */
-        result
+    fn process(&mut self,event : Event){
+        for processor in &mut self.processors{
+            processor.Process(event);
+        }
     }
 
-    pub const fn GetHeader(&self) -> &StationHeader {
-        &self.header
-    }
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn test_engine_arrival() {
-        let mut engine = StationEngine::new("Test".to_string());
-        engine.Process(&Event::gen_arrival(3.0));
-        assert_eq!(engine.header.arrivals,1);
+    fn add_processor(&mut self, processor: Box<dyn IStationProcessor>){
+        self.processors.push(processor);
     }
 
-    #[test]
-    fn test_engine_departure(){
-        let mut engine = StationEngine::new("Test".to_string());
-        engine.Process(&Event::gen_arrival(3.0));
-        engine.Process(&Event::gen_departure(4.0));
-        assert_eq!(engine.header.arrivals,1);        
-        assert_eq!(engine.header.completions,1);        
-        assert_eq!(engine.header.clock,4.0);        
+
+
+    fn get_data(&self) -> StationData{
+       
+    }
+
+    fn name(&self) -> &String {
+        &self.name
     }
 }

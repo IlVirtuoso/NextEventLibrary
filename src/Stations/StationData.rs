@@ -1,5 +1,4 @@
-pub struct StationHeader {
-    pub name: String,
+pub struct StationData {
     pub arrivals: i32,
     pub completions: i32,
     pub sysClients: i32,
@@ -13,10 +12,9 @@ pub struct StationHeader {
     pub clock: f64,
 }
 
-impl StationHeader {
-    pub const fn new(name: String) -> Self {
+impl StationData {
+    pub const fn new() -> Self {
         Self {
-            name: name,
             arrivals: 0,
             completions: 0,
             sysClients: 0,

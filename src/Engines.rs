@@ -9,12 +9,12 @@ use std::{
 use crate::{
     Collections::LightweightList::LwList,
     Events::Event,
-    Stations::Station::{self, IStation},
+    Stations::Processor::{self, IStationProcessor},
 };
 
 pub struct Engine {
     queue: VecDeque<Event>,
-    stations: Vec<&'static mut dyn IStation>,
+    stations: Vec<&'static mut dyn IStationProcessor>,
 }
 
 impl Engine {
@@ -51,7 +51,7 @@ impl Engine {
         }
     }
 
-    pub fn register_station(&mut self, station: &'static mut dyn IStation) {
+    pub fn register_station(&mut self, station: &'static mut dyn IStationProcessor) {
         self.stations.push(station);
     }
 }

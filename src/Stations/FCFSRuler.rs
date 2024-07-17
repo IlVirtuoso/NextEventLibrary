@@ -6,12 +6,11 @@ use crate::{
 };
 
 use super::{
-    Station::{IStation, StationEngine},
-    StationHeader::StationHeader,
+    Processor::{IStationProcessor, StationEngine},
+    StationData::StationData,
 };
 
 pub struct FCFSStation {
-    engine: StationEngine,
     eventQueue: VecDeque<Event>,
     eventUnderProcess: Option<Event>,
 }
@@ -64,7 +63,7 @@ impl FCFSStation {
     }
 }
 
-impl IStation for FCFSStation {
+impl IStationProcessor for FCFSStation {
     fn Process(&mut self, event: Event) {
         match event.kind {
             EventType::ARRIVAL => self.ProcessArrival(event),

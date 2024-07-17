@@ -29,7 +29,7 @@ use std::{
 use Events::Event;
 
 pub trait IStationProcessor: Sync {
-    fn Process(&mut self, event: Event);
+    fn Process(&mut self, event: &Event);
 }
  
 
@@ -62,15 +62,15 @@ impl CoreStationProcessor {
 
 
 
-    pub const fn GetHeader(&self) -> StationData {
-        self.data
+    pub const fn GetHeader(&self) -> &StationData {
+        &self.data
     }
 }
 
 
 impl IStationProcessor for CoreStationProcessor{
 
-     fn Process(&mut self, event: Event) {
+     fn Process(&mut self, event: &Event) {
         self.data.clock = event.occurTime;
         let interval = self.data.clock - self.data.oldclock;
         self.data.oldclock = event.occurTime;

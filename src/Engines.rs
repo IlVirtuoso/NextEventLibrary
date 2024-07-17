@@ -7,14 +7,12 @@ use std::{
 
 
 use crate::{
-    Collections::LightweightList::LwList,
-    Events::Event,
-    Stations::Processor::{self, IStationProcessor},
+    Collections::LightweightList::LwList, Events::Event, Numerical::SystemComposer::StationType, Stations::{Processor::{self, IStationProcessor}, Station::Station}
 };
 
 pub struct Engine {
     queue: VecDeque<Event>,
-    stations: Vec<&'static mut dyn IStationProcessor>,
+    stations: Vec<Box<Station>>,
 }
 
 impl Engine {
@@ -42,16 +40,15 @@ impl Engine {
             let dest = &evt.destination;
 
             for station in &mut self.stations {
-                let process = evt.clone();
-                if station.Name() == process.destination {
-                    station.Process(process);
+                if *station.name() == *dest {
+                    station.handle(&evt);
                 }
             }
             panic!("Not found event with destination {}", dest);
         }
     }
 
-    pub fn register_station(&mut self, station: &'static mut dyn IStationProcessor) {
+    pub fn register_station(&mut self, station: Box<Station> ) {
         self.stations.push(station);
     }
 }
@@ -72,6 +69,21 @@ mod tests {
         );
 
         Engine::instance().enqueue(event);
+    }
+
+    #[test]
+    fn test_ptr_cast(){
+        let event = &mut Event::new(
+            crate::Events::EventType::ARRIVAL,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            "none".to_string(),
+        ) as *mut Event;
+
+        let mut casted = event as *mut i32;
+        unsafe{println!("{:?}", *casted)};
     }
 }
 

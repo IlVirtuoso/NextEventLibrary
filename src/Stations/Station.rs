@@ -18,7 +18,7 @@ pub struct Station{
 
 
 impl Station {
-    fn new(name: &str) -> Self {
+   pub fn new(name: &str) -> Self {
         Station {
             name: name.to_string(),
             processors: vec![],
@@ -27,23 +27,19 @@ impl Station {
         }
     }
 
-    fn process(&mut self,event : Event){
+   pub fn handle(&mut self,event : &Event){
         for processor in &mut self.processors{
             processor.Process(event);
         }
     }
 
-    fn add_processor(&mut self, processor: Box<dyn IStationProcessor>){
+
+   pub fn add_processor(&mut self, processor: Box<dyn IStationProcessor>){
         self.processors.push(processor);
     }
 
 
-
-    fn get_data(&self) -> StationData{
-       
-    }
-
-    fn name(&self) -> &String {
+   pub fn name(&self) -> &String {
         &self.name
     }
 }

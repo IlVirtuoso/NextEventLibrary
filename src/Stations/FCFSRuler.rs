@@ -19,7 +19,6 @@ impl FCFSStation {
     pub const fn new(name: String) -> Self {
         FCFSStation {
             eventQueue: VecDeque::new(),
-            engine: StationEngine::new(name),
             eventUnderProcess: None,
         }
     }

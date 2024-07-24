@@ -15,7 +15,8 @@ const CHECK: i32 = 399268537; /* DON'T CHANGE THIS VALUE                  */
 const STREAMS: i32 = 256; /* # of streams, DON'T CHANGE THIS VALUE    */
 const A256: i32 = 22925; /* jump multiplier, DON'T CHANGE THIS VALUE */
 const DEFAULT: i32 = 123456789; /* initial seed, use 0 < DEFAULT < MODULUS  */
-
+const Q: f64 = MODULUS as f64/ MULTIPLIER as f64;
+const R: f64 = MODULUS as f64 % MULTIPLIER as f64;
 pub struct RandomGenerator {
     seed: Box<[i32]>,
     stream: usize,
@@ -37,24 +38,21 @@ impl RandomGenerator {
     }
 
     pub fn Random(&mut self) -> f64 {
-        const Q: f64 = MODULUS / MULTIPLIER;
-        const R: f64 = MODULUS % MULTIPLIER;
+
         unsafe {
             //this is not safe in multithread
             let mut t: i32 =
-                MULTIPLIER * (self.seed[self.stream] as f64 % Q) - R * (self.seed[self.stream] as f64 / Q);
+                (MULTIPLIER as f64 * (self.seed[self.stream] as f64 % Q) - R * (self.seed[self.stream] as f64 / Q)) as i32;
             if t > 0 {
                 self.seed[self.stream] = t;
             } else {
                 self.seed[self.stream] = t + MODULUS;
             }
-            return (self.seed[self.stream] / MODULUS) as f64;
+            return self.seed[self.stream] as f64 / MODULUS as f64;
         }
     }
 
     pub fn PlantSeeds(&mut self, n: i32) {
-        const Q: i32 = MODULUS / MULTIPLIER;
-        const R: i32 = MODULUS % MULTIPLIER;
         let mut x = n;
         unsafe {
             self.initialized = 1;
@@ -63,7 +61,7 @@ impl RandomGenerator {
             self.PutSeed(x);
             self.stream = s;
             for j in (1..STREAMS as usize) {
-                x = A256 * (self.seed[j - 1] % Q) - R * (self.seed[j - 1] / Q);
+                x = (A256 as f64 * (self.seed[j - 1] as f64 % Q) - R * (self.seed[j - 1] as f64 / Q)) as i32;
                 self.seed[j] = if x > 0 { x } else { x + MODULUS }
             }
         }

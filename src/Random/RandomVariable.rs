@@ -40,14 +40,13 @@ mod tests {
 
     #[test]
     fn test_random_variables() {
-        RandomGenerator::Global().PlantSeeds(250);
         let mut variable = RandomVariable::from_static_generator(1, &||{
             Exponential(10.0)
         });
 
         for i in 0..10{
             println!("{:?}",variable.call());
-            println!("{:?}",Exponential(10.0));
+            println!("{:?}",RandomGenerator::Global().Random());
         }
 
     }

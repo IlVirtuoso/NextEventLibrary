@@ -1,14 +1,12 @@
 use std::{
-    cell::RefCell,
-    collections::{HashMap, LinkedList, VecDeque},
-    hash::Hash,
+    borrow::BorrowMut, cell::RefCell, collections::{HashMap, LinkedList, VecDeque}, hash::Hash
 };
 
+use crate::{Events::Event, Stations::Station::Station};
 
 
-use crate::{
-    Collections::LightweightList::LwList, Events::Event, Numerical::SystemComposer::StationType, Stations::{Processor::{self, IStationProcessor}, Station::Station}
-};
+
+
 
 pub struct Engine {
     queue: VecDeque<Event>,
@@ -41,7 +39,7 @@ impl Engine {
 
             for station in &mut self.stations {
                 if *station.name() == *dest {
-                    station.handle(&evt);
+                    station.as_mut().handle(&evt);
                 }
             }
             panic!("Not found event with destination {}", dest);
@@ -55,12 +53,14 @@ impl Engine {
 
 #[cfg(test)]
 mod tests {
+    use crate::Events::DefaultType;
+
     use super::*;
 
     #[test]
     fn test_enqueue() {
         let event = Event::new(
-            crate::Events::EventType::ARRIVAL,
+            DefaultType::ARRIVAL.into(),
             0.0,
             0.0,
             0.0,
@@ -74,7 +74,7 @@ mod tests {
     #[test]
     fn test_ptr_cast(){
         let event = &mut Event::new(
-            crate::Events::EventType::ARRIVAL,
+            DefaultType::ARRIVAL.into(),
             0.0,
             0.0,
             0.0,

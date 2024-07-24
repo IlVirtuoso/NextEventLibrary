@@ -37,12 +37,12 @@ impl RandomGenerator {
     }
 
     pub fn Random(&mut self) -> f64 {
-        const Q: i32 = MODULUS / MULTIPLIER;
-        const R: i32 = MODULUS % MULTIPLIER;
+        const Q: f64 = MODULUS / MULTIPLIER;
+        const R: f64 = MODULUS % MULTIPLIER;
         unsafe {
             //this is not safe in multithread
             let mut t: i32 =
-                MULTIPLIER * (self.seed[self.stream] % Q) - R * (self.seed[self.stream] / Q);
+                MULTIPLIER * (self.seed[self.stream] as f64 % Q) - R * (self.seed[self.stream] as f64 / Q);
             if t > 0 {
                 self.seed[self.stream] = t;
             } else {

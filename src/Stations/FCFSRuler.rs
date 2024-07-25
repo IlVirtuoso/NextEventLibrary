@@ -10,6 +10,7 @@ use super::{Station::IEventManager, StationData::StationData};
 pub struct FCFSPolicyManager {
     eventQueue: VecDeque<Event>,
     eventUnderProcess: Option<Event>,
+    engine: Option<*mut Engine>,
 }
 
 impl IEventManager for FCFSPolicyManager {
@@ -23,11 +24,16 @@ impl IEventManager for FCFSPolicyManager {
 }
 
 impl FCFSPolicyManager {
-    pub const fn new() -> Self {
+    pub fn new() -> Self {
         FCFSPolicyManager {
             eventQueue: VecDeque::new(),
             eventUnderProcess: None,
+            engine: None,
         }
+    }
+
+    pub fn use_engine(&mut self, engine: *mut Engine) {
+        self.engine = Some(engine);
     }
 
     pub fn ProcessArrival(&mut self, evt: &Event, data: &mut StationData) {
@@ -51,8 +57,10 @@ impl FCFSPolicyManager {
     }
 
     pub fn ProcessDeparture(&mut self, evt: &Event, data: &mut StationData) {
-        if self.eventUnderProcess.is_none() || *self.eventUnderProcess.as_ref().unwrap() != *evt
-        || evt.subType != DefaultType::INPROCESS {
+        if self.eventUnderProcess.is_none()
+            || *self.eventUnderProcess.as_ref().unwrap() != *evt
+            || evt.subType != DefaultType::INPROCESS
+        {
             panic!("Event departure requested not in process");
         }
         self.eventUnderProcess = None;
@@ -68,7 +76,13 @@ impl FCFSPolicyManager {
             new_evt.createTime = clock;
             new_evt.occurTime = clock + new_evt.serviceTime;
             new_evt.kind = DefaultType::DEPARTURE.into();
-            Engine::instance().enqueue(new_evt.clone());
+            if self.engine.is_none() {
+                Engine::instance().enqueue(new_evt.clone());
+            } else {
+                unsafe{
+                    (*self.engine.unwrap()).enqueue(new_evt.clone());
+                }
+            }
             self.eventUnderProcess = Some(new_evt);
         } else {
             self.eventUnderProcess = None;
@@ -78,7 +92,10 @@ impl FCFSPolicyManager {
 
 #[cfg(test)]
 mod tests {
-    use crate::{Random::{rngs::RandomGenerator, rvgs::Exponential}, Stations::Station::Station};
+    use crate::{
+        Random::{rngs::RandomGenerator, rvgs::Exponential},
+        Stations::Station::Station,
+    };
 
     use super::*;
     use std::alloc::{alloc, dealloc, Layout};
@@ -86,8 +103,12 @@ mod tests {
     #[test]
     fn test_station_arrival() {
         let mut data = StationData::new();
-        for i in 0..100{
+        let mut engine = Engine::new();
+        let mut station = Station::new("Mock");
+        station.set_handler(Box::new(FCFSPolicyManager::new()));
+        for i in 0..100 {
             let mut event = Event::gen_arrival(data.clock + Exponential(10.0));
+            event.destination = station.name().clone();
             
         }
     }

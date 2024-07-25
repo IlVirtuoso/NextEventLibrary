@@ -2,7 +2,7 @@ use std::{
     borrow::BorrowMut, cell::RefCell, collections::{HashMap, LinkedList, VecDeque}, hash::Hash
 };
 
-use crate::{Events::Event, Stations::Station::Station};
+use crate::{Events::Event, Stations::Station::{IEventManager, Station}};
 
 
 
@@ -22,6 +22,10 @@ impl Engine {
         unsafe {
             return &mut INSTANCE;
         }
+    }
+
+    pub fn new()-> Self{
+        Engine { queue: VecDeque::new(), stations: Vec::new() }
     }
 
     pub fn enqueue(&mut self, event: Event) {

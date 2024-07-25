@@ -70,7 +70,7 @@ pub fn Binomial(n: u32, p: f64) -> u32 {
 }
 
 pub fn Geometric(p: f64) -> u32 {
-    ((1.0 - Random()).log(10.0) / p.log(10.0)) as u32
+    ((1.0 - Random()).ln() / p.ln()) as u32
 }
 
 pub fn Pascal(n: u32, p: f64) -> u32 {
@@ -83,7 +83,7 @@ pub fn Pascal(n: u32, p: f64) -> u32 {
 
 //also called negative exponential
 pub fn Exponential(m: f64) -> f64 {
-    -m * (1.0 - Random()).log(10.0)
+    -m * (1.0 - Random()).ln()
 }
 
 pub fn Poisson(m: f64) -> u32 {
@@ -123,9 +123,9 @@ pub fn Normal(m: f64, s: f64) -> f64 {
     let (mut u, mut t, mut p, mut q, mut z) = (0.0, 0.0, 0.0, 0.0, 0.0);
     u = Random();
     if u < 0.5 {
-        t = (-2.0 * u.log(10.0)).sqrt();
+        t = (-2.0 * u.ln()).sqrt();
     } else {
-        t = (-2.0 * u.log10()).sqrt();
+        t = (-2.0 * u.ln()).sqrt();
     }
 
     p   = p0 + t * (p1 + t * (p2 + t * (p3 + t * p4)));

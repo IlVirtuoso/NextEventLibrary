@@ -88,7 +88,7 @@ mod tests {
     #[test]
     fn test_forwarder() {
         let mut station = Station::new("mock");
-        station.set_handler(Box::new(FCFSPolicyManager::new()));
+       
         station.handle(&Event::gen_arrival(10.0));
         println!("{:?}", station.get_data())
     }

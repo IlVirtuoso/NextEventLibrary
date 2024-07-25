@@ -44,14 +44,23 @@ impl Engine {
             for station in &mut self.stations {
                 if *station.name() == *dest {
                     station.as_mut().handle(&evt);
+                    return;
                 }
             }
             panic!("Not found event with destination {}", dest);
         }
     }
 
+    pub fn stations(&self)-> &Vec<Box<Station>>{
+        &self.stations
+    }
+
     pub fn register_station(&mut self, station: Box<Station> ) {
         self.stations.push(station);
+    }
+
+    pub fn has_events(&self)->bool{
+        !self.queue.is_empty()
     }
 }
 

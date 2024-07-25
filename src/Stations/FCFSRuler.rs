@@ -15,6 +15,7 @@ pub struct FCFSPolicyManager {
 
 impl IEventManager for FCFSPolicyManager {
     fn process_event(&mut self, event: &Event, data: &mut super::StationData::StationData) {
+        data.update(event.occurTime);
         match DefaultType::from(event.kind) {
             DefaultType::ARRIVAL => self.ProcessArrival(event, data),
             DefaultType::DEPARTURE => self.ProcessDeparture(event, data),
@@ -49,40 +50,38 @@ impl FCFSPolicyManager {
             newevt.occurTime = clock + newevt.serviceTime;
             newevt.createTime = clock;
             newevt.kind = DefaultType::DEPARTURE.into();
-            self.eventUnderProcess = Some(newevt.clone());
-            Engine::instance().enqueue(newevt);
+            self.enqueue_event(&newevt);
+            self.eventUnderProcess = Some(newevt);
         } else {
             self.eventQueue.push_back(event);
         }
     }
 
-    pub fn ProcessDeparture(&mut self, evt: &Event, data: &mut StationData) {
-        if self.eventUnderProcess.is_none()
-            || *self.eventUnderProcess.as_ref().unwrap() != *evt
-            || evt.subType != DefaultType::INPROCESS
-        {
-            panic!("Event departure requested not in process");
-        }
-        self.eventUnderProcess = None;
-
-        if data.sysClients > 0 {
-            if self.eventQueue.is_empty() {
-                panic!("Event queue should not be empty because clients are not 0");
+    fn enqueue_event(&mut self, event: &Event){
+        if self.engine.is_none() {
+            Engine::instance().enqueue(event.clone());
+        } else {
+            unsafe{
+                (*self.engine.unwrap()).enqueue(event.clone());
             }
+        }
+    }
+
+    pub fn ProcessDeparture(&mut self, evt: &Event, data: &mut StationData) {
+        debug_assert!(!(self.eventUnderProcess.is_none()
+        || *self.eventUnderProcess.as_ref().unwrap() != *evt
+        || evt.subType != DefaultType::INPROCESS),"Event departure requested not in process");
+        self.eventUnderProcess = None;
+        data.client_departure();
+        if data.sysClients > 1 {
+            debug_assert!(!self.eventQueue.is_empty(),"Event queue should not be empty while more than 1 client is in the system");
             let mut new_evt = self.eventQueue.pop_front().unwrap();
-            data.client_departure();
             let clock = data.clock;
             new_evt.arrivalTime = clock;
             new_evt.createTime = clock;
             new_evt.occurTime = clock + new_evt.serviceTime;
             new_evt.kind = DefaultType::DEPARTURE.into();
-            if self.engine.is_none() {
-                Engine::instance().enqueue(new_evt.clone());
-            } else {
-                unsafe{
-                    (*self.engine.unwrap()).enqueue(new_evt.clone());
-                }
-            }
+            self.enqueue_event(&new_evt);
             self.eventUnderProcess = Some(new_evt);
         } else {
             self.eventUnderProcess = None;
@@ -98,18 +97,25 @@ mod tests {
     };
 
     use super::*;
-    use std::alloc::{alloc, dealloc, Layout};
+    
 
     #[test]
     fn test_station_arrival() {
-        let mut data = StationData::new();
         let mut engine = Engine::new();
         let mut station = Station::new("Mock");
-        station.set_handler(Box::new(FCFSPolicyManager::new()));
+        let mut handler = FCFSPolicyManager::new();
+        handler.use_engine(&mut engine as *mut Engine);
+        station.set_handler(Box::new(handler));
+        engine.register_station(Box::new(station));
         for i in 0..100 {
-            let mut event = Event::gen_arrival(data.clock + Exponential(10.0));
-            event.destination = station.name().clone();
-            
+            let mut event = Event::gen_arrival(engine.stations()[0].get_data().clock + Exponential(10.0));
+            event.destination = engine.stations()[0].name().clone();
+            engine.enqueue(event);
+            while engine.has_events() {
+                engine.tick();
+            }
         }
+
+        println!("{:?}",engine.stations()[0].get_data());
     }
 }
